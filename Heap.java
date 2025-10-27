@@ -18,6 +18,13 @@ public class Heap<HeapMemberGeneric extends HeapMember> {
 
     private void heapifyUp(int i)
     {
+        // Print heap state after swap
+//        System.out.print("  Current heap: ");
+//        for (int k = 0; k < minHeap.size(); k++) {
+//            System.out.print(minHeap.get(k).getValue() + " ");
+//        }
+//        System.out.println();
+
         int parent;
         if (i == 0) {
             parent = 0;
@@ -30,6 +37,13 @@ public class Heap<HeapMemberGeneric extends HeapMember> {
             minHeap.get(parent).setIndex(i);
             minHeap.set(i,minHeap.get(parent));
             minHeap.set(parent,swapedHeapMember);
+
+            // Print heap state after swap
+            System.out.print("  Current heap: ");
+            for (int k = 0; k < minHeap.size(); k++) {
+                System.out.print(minHeap.get(k).getValue() + " ");
+            }
+            System.out.println();
 
             heapifyUp(parent);
         }
@@ -57,41 +71,40 @@ public class Heap<HeapMemberGeneric extends HeapMember> {
         int n = minHeap.size();
         int left = 2 * i + 1;
         int right = 2 * i + 2;
-        int j = i; // will store the index of the smaller child (if any)
+        int smaller = i; // will store the index of the smaller child
 
-        // case: no left child → done
-        if (left >= n) {
-            return;
+        //Find smallest child
+        if ((left < n) && (minHeap.get(left).getValue() < minHeap.get(smaller).getValue())) { //left child is in heap and is smaller
+            smaller = left;
+        }
+        if ((right < n) && (minHeap.get(right).getValue() < minHeap.get(smaller).getValue())) { //right child is in heap and is smaller
+            smaller = right;
+        }
+        if (smaller == i) { //parent is smallest
+            return; //do nothing (no swaps necessary)
         }
 
-        // case: only left child exists
-        if (right >= n) {
-            j = left;
-        }
-        // case: both children exist
-        else {
-            // pick the smaller of the two children
-            if (minHeap.get(left).getValue() < minHeap.get(right).getValue()) {
-                j = left;
-            } else {
-                j = right;
-            }
-        }
+        //Swap parent with smaller child
+        HeapMemberGeneric currentNode = minHeap.get(i); //return currentNode object
+        HeapMemberGeneric smallerNode = minHeap.get(smaller); //return smallerNode object
+        minHeap.set(i, smallerNode); //set old index with smaller node
+        minHeap.set(smaller,currentNode); //move old parent down (swap)
+        smallerNode.setIndex(i); //set smaller node to new larger index (old index)
+        currentNode.setIndex(smaller); //set old parent node to larger index (smaller is the index of a node lower in tree, so 'smaller' value > 'i'
 
-        // now compare parent with the smaller child
-        if (minHeap.get(j).getValue() < minHeap.get(i).getValue()) {
-            // swap
-            HeapMemberGeneric temp = minHeap.get(i);
-            temp.setIndex(j);
-            minHeap.get(j).setIndex(i);
-
-            minHeap.set(i, minHeap.get(j));
-            minHeap.set(j, temp);
-
-            // recurse down
-            heapifyDown(j);
-        }
+        // recurse down
+        heapifyDown(smaller); //start at node that we just moved down to see if we need to maintain structure till bottom of heap
     }
+
+    //added for debug
+    public int size() {
+        return minHeap.size();
+    }
+
+    public HeapMemberGeneric get(int index) {
+        return minHeap.get(index);
+    }
+
 
     /**
      * buildHeap(ArrayList<HeapMember> heap_members)
